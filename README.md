@@ -2,6 +2,8 @@
 
 A simple Observable implementation in JavaScript.
 
+![Tests](https://github.com/dobschal/Observable/actions/workflows/test.yml/badge.svg)
+
 ## Installation
 
 ```bash
