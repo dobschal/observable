@@ -1,0 +1,53 @@
+const Observable = require("./Observable.js");
+
+test("Observable contains correct value and subscriber is called when changes happen.", () => {
+    const mockedSubscriber = jest.fn();
+    const observable = Observable("test");
+    observable.subscribe(mockedSubscriber);
+    expect(observable.value).toBe("test");
+    observable.value = "new test";
+    expect(observable.value).toBe("new test");
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("Observable can be mapped to a new observable.", () => {
+    const observable = Observable([1, 2, 3]);
+    const mappedObservable = observable.map(value => value * 2);
+    expect(mappedObservable.value.join("")).toBe([2, 4, 6].join(""));
+    observable.value = [4, 5, 6];
+    expect(mappedObservable.value.join("")).toBe([8, 10, 12].join(""));
+});
+
+test("Pushing a value to an array in an observable triggers the subscriber.", () => {
+    const observable = Observable([1, 2, 3]);
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.push(4);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("The subscribe callback function gets the new value of the Observable.", () => {
+    const observable = Observable(5);
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value = 10;
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+    expect(mockedSubscriber).toHaveBeenCalledWith(10);
+});
+
+test("Changing a Date object in an observable triggers the subscriber.", () => {
+    const observable = Observable(new Date("2020-01-01"));
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.setFullYear(2021);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("Unsubscribing a subscriber stops it from being called.", () => {
+    const observable = Observable(5);
+    const mockedSubscriber = jest.fn();
+    const unsubscribe = observable.subscribe(mockedSubscriber);
+    unsubscribe();
+    observable.value = 10;
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});

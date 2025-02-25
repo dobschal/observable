@@ -1,0 +1,21 @@
+{
+  "name": "observable",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ."
+  },
+  "keywords": ["Observable", "Observer", "Observer Pattern"],
+  "author": "Sascha Dobschal <sascha@dobschal.eu>",
+  "license": "WTFPL",
+  "description": "Turn any variable into an observable object.",
+  "devDependencies": {
+    "eslint": "^9.21.0",
+    "jest": "^29.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
