@@ -33,6 +33,8 @@ function Observable(initialValue) {
                 _observeObjectModifiers(listeners, newValue, ["push", "sort", "unshift", "pop", "shift", "splice", "reverse"]);
             } else if (newValue instanceof Date) { // isDate
                 _observeObjectModifiers(listeners, newValue, ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds"]);
+            } else if(newValue instanceof HTMLElement) {
+                _observeObjectModifiers(listeners, newValue, ["appendChild", "remove", "replaceWith", "setAttribute", "removeAttribute"]);
             } else if (newValue !== Object(newValue)) { // isPrimitive
                 value = newValue;
             } else {

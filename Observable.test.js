@@ -51,3 +51,11 @@ test("Unsubscribing a subscriber stops it from being called.", () => {
     observable.value = 10;
     expect(mockedSubscriber).toHaveBeenCalledTimes(1);
 });
+
+test("Observing an HTMLElement works.", () => {
+    const observable = Observable(document.createElement("div"));
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.setAttribute("id", "test");
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
