@@ -8,7 +8,7 @@ A simple Observable implementation in JavaScript.
 ## Installation
 
 ```bash
-npm install --save @dobschal/Observable
+npm install --save @dobschal/observable
 ```
 
 ## Usage
