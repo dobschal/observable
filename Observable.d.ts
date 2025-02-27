@@ -6,4 +6,4 @@ interface ObservableVariable<T> {
     map(callback: (value: any) => any): ObservableVariable<any>;
 }
 
-export default function Observable<T>(initialValue: T): ObservableVariable<T>;
+export default function Observable<T>(initialValue: T, deep?: boolean): ObservableVariable<T>;

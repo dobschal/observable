@@ -1,4 +1,4 @@
-function Observable(initialValue) {
+function Observable(initialValue, deep = true) {
     const listeners = new Set();
     let value;
 
@@ -26,22 +26,25 @@ function Observable(initialValue) {
     }
 
     function _setValue(newValue) {
-        if (value !== newValue) {
+        if (value === newValue) return;
+        if(!deep) {
+            value = newValue;
+        } else {
             if (newValue?.constructor === Object) { // isPlainObject
                 _observePlainObject(listeners, newValue);
             } else if (Array.isArray(newValue)) { // isArray
                 _observeObjectModifiers(listeners, newValue, ["push", "sort", "unshift", "pop", "shift", "splice", "reverse"]);
             } else if (newValue instanceof Date) { // isDate
                 _observeObjectModifiers(listeners, newValue, ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds"]);
-            } else if(newValue instanceof HTMLElement) {
+            } else if (newValue instanceof HTMLElement) {
                 _observeObjectModifiers(listeners, newValue, ["appendChild", "remove", "replaceWith", "setAttribute", "removeAttribute"]);
             } else if (newValue !== Object(newValue)) { // isPrimitive
                 value = newValue;
             } else {
                 throw new Error("Observable does not support type: " + typeof newValue);
             }
-            listeners.forEach(listener => listener(value));
         }
+        listeners.forEach(listener => listener(value));
     }
 
     _setValue(initialValue);

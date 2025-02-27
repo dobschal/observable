@@ -79,3 +79,47 @@ test("The value of a Computeds function cannot be set", () => {
     expect(() => { computed.value = 10; }).toThrow();
 });
 
+test("Non-deep computed is not affected by changes to the observables properties", () => {
+    const observable = Observable({ a: 5 }, true);
+    const computed = Computed(() => observable.value, false);
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    expect(computed.value.a).toBe(5);
+    computed.value.a = 10;
+    expect(computed.value.a).toBe(10);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});
+
+test("Non-deep computed is not affected by changes to the observables properties", () => {
+    const observable = Observable({ a: 5 }, false);
+    const computed = Computed(() => observable.value, true);
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    expect(computed.value.a).toBe(5);
+    observable.value.a = 10;
+    expect(computed.value.a).toBe(10);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});
+
+test("deep computed is affected by changes to the observables properties", () => {
+    const observable = Observable({ a: 5 }, false);
+    const computed = Computed(() => observable.value, true);
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    expect(computed.value.a).toBe(5);
+    computed.value.a = 10;
+    expect(computed.value.a).toBe(10);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("deep computed is affected by changes to the observables properties", () => {
+    const observable = Observable({ a: 5 }, true);
+    const computed = Computed(() => observable.value, true);
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    expect(computed.value.a).toBe(5);
+    observable.value.a = 10;
+    expect(computed.value.a).toBe(10);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+

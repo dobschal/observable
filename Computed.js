@@ -1,8 +1,8 @@
 const Observable = require("./Observable.js");
 
-function Computed(fn) {
+function Computed(fn, deep = false) {
 
-    const observable = Observable();
+    const observable = Observable(undefined, deep);
 
     const computed = {
         isObservable: true,

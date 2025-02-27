@@ -59,3 +59,36 @@ test("Observing an HTMLElement works.", () => {
     observable.value.setAttribute("id", "test");
     expect(mockedSubscriber).toHaveBeenCalledTimes(2);
 });
+
+test("Non-deep observables support any type.", () => {
+    const observable = Observable(Promise, false);
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value = "test";
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("Deep observables throw an error if the type isn't supported.", () => {
+    expect(() => {
+        const observable = Observable(Promise);
+        const mockedSubscriber = jest.fn();
+        observable.subscribe(mockedSubscriber);
+        observable.value = "test";
+    }).toThrow("Observable does not support type: function");
+});
+
+test("Non-deep observables subscriber isn't called if property changes.", () => {
+    const observable = Observable(document.createElement("div"), false);
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.setAttribute("id", "test");
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});
+
+test("Deep observables subscriber is called if property changes.", () => {
+    const observable = Observable(document.createElement("div"));
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.setAttribute("id", "test");
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});

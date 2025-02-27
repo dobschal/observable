@@ -5,4 +5,4 @@ interface ComputedValue<T> {
     unsubscribe(callback: (value: any) => void): void;
 }
 
-export default function Computed<T>(fn: () => T): ComputedValue<T>;
+export default function Computed<T>(fn: () => T, deep?: boolean): ComputedValue<T>;
