@@ -2,7 +2,7 @@
 
 A simple Observable implementation in JavaScript.
 
-![Test](https://github.com/dobschal/Observable/actions/workflows/test.yml/badge.svg)
+![Test](https://github.com/dobschal/observable/actions/workflows/test.yml/badge.svg)
 [![NPM](https://img.shields.io/npm/v/@dobschal/observable)](https://www.npmjs.com/package/@dobschal/observable)
 
 ## Installation
