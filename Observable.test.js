@@ -92,3 +92,13 @@ test("Deep observables subscriber is called if property changes.", () => {
     observable.value.setAttribute("id", "test");
     expect(mockedSubscriber).toHaveBeenCalledTimes(2);
 });
+
+test("Pushing a value to an array in an observable triggers the subscriber with the whole array.", () => {
+    const array  = [1, 2, 3];
+    const observable = Observable(array);
+    const mockedSubscriber = jest.fn();
+    observable.subscribe(mockedSubscriber);
+    observable.value.push(4);
+    expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+    expect(mockedSubscriber).toHaveBeenCalledWith(array);
+});

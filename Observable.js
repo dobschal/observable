@@ -19,7 +19,7 @@ function Observable(initialValue, deep = true) {
         for (const method of methodNames) {
             newValue[method] = function (...args) {
                 const retVal = Object.getPrototypeOf(newValue)[method].apply(this, args);
-                listeners.forEach((callback) => callback(retVal));
+                listeners.forEach((callback) => callback(value));
                 return retVal;
             };
         }
