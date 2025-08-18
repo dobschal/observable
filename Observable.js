@@ -52,7 +52,7 @@ function Observable(initialValue, deep = true) {
     return {
         isObservable: true,
         get value() {
-            if(Array.isArray(Observable.observablesCalled)) {
+            if(Array.isArray(Observable.observablesCalled) && !Observable.observablesCalled.includes(this)) {
                 Observable.observablesCalled.push(this);
             }
             return value;

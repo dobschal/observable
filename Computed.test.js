@@ -123,3 +123,38 @@ test("deep computed is affected by changes to the observables properties", () =>
     expect(mockedSubscriber).toHaveBeenCalledTimes(2);
 });
 
+test("Have two computed arrays --> subscriber is called only once", () => {
+    const entries = Observable([{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}, {value: 7}, {value: 8}, {value: 9}, {value: 10}], true);
+    const categories = Observable([{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}, {value: 7}, {value: 8}, {value: 9}, {value: 10}], true);
+    const filter = Observable({ yeah: true, name: "fake"}, true);
+
+    function getCategories() {
+        return categories.value.map(c => {
+            return {
+                value: c.value,
+                name: filter.name
+            };
+        });
+    }
+
+    function getEntries() {
+        const categories = getCategories();
+        return entries.value.map(e => {
+            return {
+                value: e.value,
+                categories: categories.find(c => c.value === e.value),
+                name: filter.value.name
+            };
+        });
+    }
+
+    const computed = Computed(() => {
+        return getEntries().map(e => e.name);
+    });
+
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    expect(computed.value[0]).toBe("fake");
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});
+
