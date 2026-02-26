@@ -90,7 +90,7 @@ test("Non-deep computed is not affected by changes to the observables properties
     expect(mockedSubscriber).toHaveBeenCalledTimes(1);
 });
 
-test("Non-deep computed is not affected by changes to the observables properties", () => {
+test("Non-deep observable property change is not detected but value reflects mutation", () => {
     const observable = Observable({ a: 5 }, false);
     const computed = Computed(() => observable.value, true);
     const mockedSubscriber = jest.fn();
@@ -101,7 +101,7 @@ test("Non-deep computed is not affected by changes to the observables properties
     expect(mockedSubscriber).toHaveBeenCalledTimes(1);
 });
 
-test("deep computed is affected by changes to the observables properties", () => {
+test("Deep computed subscriber is called when computed value property changes directly", () => {
     const observable = Observable({ a: 5 }, false);
     const computed = Computed(() => observable.value, true);
     const mockedSubscriber = jest.fn();
@@ -112,7 +112,7 @@ test("deep computed is affected by changes to the observables properties", () =>
     expect(mockedSubscriber).toHaveBeenCalledTimes(2);
 });
 
-test("deep computed is affected by changes to the observables properties", () => {
+test("Deep computed subscriber is called when deep observable property changes", () => {
     const observable = Observable({ a: 5 }, true);
     const computed = Computed(() => observable.value, true);
     const mockedSubscriber = jest.fn();
@@ -121,6 +121,53 @@ test("deep computed is affected by changes to the observables properties", () =>
     observable.value.a = 10;
     expect(computed.value.a).toBe(10);
     expect(mockedSubscriber).toHaveBeenCalledTimes(2);
+});
+
+test("Recorder is cleaned up even if the computed function throws", () => {
+    expect(() => {
+        Computed(() => { throw new Error("test error"); });
+    }).toThrow("test error");
+    expect(Observable.observablesCalled).toBeUndefined();
+    expect(Observable.recorders).toBeUndefined();
+    // Computed still works after the error
+    const observable = Observable(5);
+    const computed = Computed(() => observable.value + 1);
+    expect(computed.value).toBe(6);
+});
+
+test("Computed depending on multiple observables updates when any of them changes.", () => {
+    const a = Observable(2);
+    const b = Observable(3);
+    const computed = Computed(() => a.value + b.value);
+    expect(computed.value).toBe(5);
+    a.value = 10;
+    expect(computed.value).toBe(13);
+    b.value = 20;
+    expect(computed.value).toBe(30);
+});
+
+test("Computed unsubscribe() method removes the listener.", () => {
+    const observable = Observable(5);
+    const computed = Computed(() => observable.value + 1);
+    const mockedSubscriber = jest.fn();
+    computed.subscribe(mockedSubscriber);
+    computed.unsubscribe(mockedSubscriber);
+    observable.value = 10;
+    expect(mockedSubscriber).toHaveBeenCalledTimes(1);
+});
+
+test("isObservable property is true on Computed.", () => {
+    const computed = Computed(() => 5);
+    expect(computed.isObservable).toBe(true);
+});
+
+test("Disposing a Computed stops it from updating when dependencies change.", () => {
+    const observable = Observable(5);
+    const computed = Computed(() => observable.value + 1);
+    expect(computed.value).toBe(6);
+    computed.dispose();
+    observable.value = 10;
+    expect(computed.value).toBe(6);
 });
 
 test("Have two computed arrays --> subscriber is called only once", () => {
@@ -132,7 +179,7 @@ test("Have two computed arrays --> subscriber is called only once", () => {
         return categories.value.map(c => {
             return {
                 value: c.value,
-                name: filter.name
+                name: filter.value.name
             };
         });
     }

@@ -1,9 +1,10 @@
 interface ObservableVariable<T> {
+    isObservable: true;
     value: T;
     set(value: T): void;
-    subscribe(callback: (value: T) => void): void;
+    subscribe(callback: (value: T) => void): () => void;
     unsubscribe(callback: (value: T) => void): void;
-    map(callback: (value: any) => any): ObservableVariable<any>;
+    map(callback: (value: any) => any): ObservableVariable<any> & { dispose(): void };
 }
 
 export default function Observable<T>(initialValue: T, deep?: boolean): ObservableVariable<T>;

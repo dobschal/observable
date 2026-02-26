@@ -2,27 +2,27 @@ function Observable(initialValue, deep = true) {
     const listeners = new Set();
     let value;
 
-    function _observePlainObject(listeners, newValue) {
+    function _observe(newValue, methodNames) {
         value = new Proxy(newValue, {
+            get(target, property, receiver) {
+                const val = Reflect.get(target, property, receiver);
+                if (typeof val === "function" && methodNames.includes(property)) {
+                    return function (...args) {
+                        const retVal = val.apply(target, args);
+                        listeners.forEach(callback => callback(value));
+                        return retVal;
+                    };
+                }
+                return val;
+            },
             set(target, property, newPropertyValue) {
                 if (target[property] !== newPropertyValue) {
                     target[property] = newPropertyValue;
-                    listeners.forEach(listener => listener(target));
+                    listeners.forEach(listener => listener(value));
                 }
                 return true;
             }
         });
-    }
-
-    function _observeObjectModifiers(listeners, newValue, methodNames) {
-        value = newValue;
-        for (const method of methodNames) {
-            newValue[method] = function (...args) {
-                const retVal = Object.getPrototypeOf(newValue)[method].apply(this, args);
-                listeners.forEach((callback) => callback(value));
-                return retVal;
-            };
-        }
     }
 
     function _setValue(newValue) {
@@ -31,13 +31,13 @@ function Observable(initialValue, deep = true) {
             value = newValue;
         } else {
             if (newValue?.constructor === Object) { // isPlainObject
-                _observePlainObject(listeners, newValue);
+                _observe(newValue, []);
             } else if (Array.isArray(newValue)) { // isArray
-                _observeObjectModifiers(listeners, newValue, ["push", "sort", "unshift", "pop", "shift", "splice", "reverse"]);
+                _observe(newValue, ["push", "sort", "unshift", "pop", "shift", "splice", "reverse", "fill", "copyWithin"]);
             } else if (newValue instanceof Date) { // isDate
-                _observeObjectModifiers(listeners, newValue, ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds"]);
+                _observe(newValue, ["setDate", "setFullYear", "setHours", "setMilliseconds", "setMinutes", "setMonth", "setSeconds", "setTime", "setUTCDate", "setUTCFullYear", "setUTCHours", "setUTCMilliseconds", "setUTCMinutes", "setUTCMonth", "setUTCSeconds"]);
             } else if (newValue instanceof HTMLElement) {
-                _observeObjectModifiers(listeners, newValue, ["appendChild", "remove", "replaceWith", "setAttribute", "removeAttribute"]);
+                _observe(newValue, ["appendChild", "remove", "replaceWith", "setAttribute", "removeAttribute"]);
             } else if (newValue !== Object(newValue)) { // isPrimitive
                 value = newValue;
             } else {
@@ -73,13 +73,14 @@ function Observable(initialValue, deep = true) {
         },
         map(mapFunction) {
             const newObservable = Observable();
-            this.subscribe((unwrappedValue) => {
+            const unsubscribe = this.subscribe((unwrappedValue) => {
                 if (Array.isArray(unwrappedValue)) {
                     newObservable.value = unwrappedValue.map(mapFunction);
                 } else {
                     newObservable.value = mapFunction(unwrappedValue);
                 }
             });
+            newObservable.dispose = unsubscribe;
             return newObservable;
         }
     };

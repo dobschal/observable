@@ -3,6 +3,7 @@ const Observable = require("./Observable.js");
 function Computed(fn, deep = false) {
 
     const observable = Observable(undefined, deep);
+    const subscriptions = [];
 
     const computed = {
         isObservable: true,
@@ -20,6 +21,9 @@ function Computed(fn, deep = false) {
         },
         unsubscribe(listener) {
             observable.unsubscribe(listener);
+        },
+        dispose() {
+            subscriptions.forEach(unsub => unsub());
         }
     };
 
@@ -28,10 +32,14 @@ function Computed(fn, deep = false) {
     };
 
     const getCalledObservables = Observable.recordObservablesCalled();
-    update();
-    const dependencies = getCalledObservables();
-    dependencies.forEach(observable => {
-        observable.subscribe(update);
+    let dependencies;
+    try {
+        update();
+    } finally {
+        dependencies = getCalledObservables();
+    }
+    dependencies.forEach(dep => {
+        subscriptions.push(dep.subscribe(update));
     });
 
     return computed;
